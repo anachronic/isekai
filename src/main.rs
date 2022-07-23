@@ -1,31 +1,7 @@
-#[macro_use]
-extern crate rocket;
-
-use rocket::http::Status;
-use rocket::response::Redirect;
-use redis::Commands;
-
-#[get("/<redir>")]
-async fn redirect(redir: String) -> Result<Redirect, Status> {
-    let url = std::env::var("REDIS_URL").unwrap();
-
-    let client = redis::Client::open(url).unwrap();
-    let mut con = client.get_connection().unwrap();
-
-    let something: Result<String, _> = con.get(&redir);
-
-    match something {
-        Err(_) => {
-            println!("Redis errored");
-            return Err(Status::NotFound)
-        },
-        Ok(url) => {
-            return Ok(Redirect::permanent(url))
-        }
-    }
-}
+use isekai::build_rocket;
+use rocket::launch;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![redirect])
+    build_rocket()
 }
