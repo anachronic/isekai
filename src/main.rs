@@ -1,12 +1,15 @@
 #[macro_use]
 extern crate rocket;
 
-use rocket::{response::Redirect, http::Status};
+use rocket::http::Status;
+use rocket::response::Redirect;
 use redis::Commands;
 
 #[get("/<redir>")]
 async fn redirect(redir: String) -> Result<Redirect, Status> {
-    let client = redis::Client::open("redis://127.0.0.1").unwrap();
+    let url = std::env::var("REDIS_URL").unwrap();
+
+    let client = redis::Client::open(url).unwrap();
     let mut con = client.get_connection().unwrap();
 
     let something: Result<String, _> = con.get(&redir);
